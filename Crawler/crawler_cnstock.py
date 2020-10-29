@@ -23,9 +23,10 @@ class WebCrawlFromcnstock(object):
 
     # Arguments:
         totalPages: Number of pages set to be crawled.
+        将整个网页分成totalPages/Range部分进行多线程处理
         Range: Divide total web pages into totalPages/Range parts 
                for multi-threading processing.
-        ThreadsNum: Number of threads needed to be start.
+        ThreadsNum（多线程）: Number of threads needed to be start.
         dbName: Name of database.
         colName: Name of collection.
         IP: Local IP address.
@@ -51,43 +52,59 @@ class WebCrawlFromcnstock(object):
 
     def countchn(self,string):
         '''Count Chinese numbers and calculate the frequency of Chinese occurrence.
+            统计汉语数字，计算汉语出现的频率
 
         # Arguments:
             string: Each part of crawled website analyzed by BeautifulSoup.
         '''
+        #中文, 必须表明所需编码,U代表是对字符串进行unicode编码
+        #u'[\u1100-\uFFFDh]+?' 相当于所有的中文字符和其他特殊字符
+        #这个h是什么意思？不会是html里面的</h>吧.....
         pattern = re.compile(u'[\u1100-\uFFFDh]+?')
         result = pattern.findall(string)
+        #findalll得到的结果是一个List,里面的元素都是且仅是单一的中文，
         chnnum = len(result)
         possible = chnnum/len(str(string))
+        #返回中文长度和频率
         return (chnnum, possible)
+
 
     def getUrlInfo(self,url): 
         '''Analyze website and extract useful information.
         '''
+        #这里的爬虫很直接，主要是网站基本没有反爬机制
         respond = requests.get(url)
+        #确定编码方式，我也老是搞不清或者忘掉这个所以出现乱码
         respond.encoding = BeautifulSoup(respond.content, "lxml").original_encoding
         bs = BeautifulSoup(respond.text, "lxml")
-        span_list = bs.find_all('span')
+        span_list = bs.find_all('span') #找每个新闻的时间
+        #z找到每个新闻的内容，标签？
         part = bs.find_all('p')
         article = ''
         date = ''
         for span in span_list:
+            #这个地方好像['timer']要改成['time']
+            #这里只拿到第一个正确的时间
             if 'class' in span.attrs and span['class'] == ['timer']:
                 date = span.text
                 break
-
+        #把所以中文频率大于0.5的内容合在一起，这里会忽略标签
         for paragraph in part:
             chnstatus = self.countchn(str(paragraph))
             possible = chnstatus[1]
             if possible > self.Prob:
-               article += str(paragraph)
+                #如果中文字符的频率大于0.5
+                article += str(paragraph)
 
         while article.find('<') != -1 and article.find('>') != -1:
-              string = article[article.find('<'):article.find('>')+1]
-              article = article.replace(string,'')
+            #把<p>和</p>去掉
+            string = article[article.find('<'):article.find('>')+1]
+            article = article.replace(string,'')
+        #\u3000是去掉中文空格，但实际上还有半角空格，应该再除'\u0020'
         while article.find('\u3000') != -1:
-              article = article.replace('\u3000','')
+            article = article.replace('\u3000','')
 
+        #re.split 切割字符串
         article = ' '.join(re.split(' +|\n+', article)).strip() 
 
         return date, article
