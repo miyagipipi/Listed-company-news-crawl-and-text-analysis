@@ -71,20 +71,21 @@ class WebCrawlFromcnstock(object):
 
     def getUrlInfo(self,url): 
         '''Analyze website and extract useful information.
+           返回一个网站的发布时间和正文中的所以中文
         '''
         #这里的爬虫很直接，主要是网站基本没有反爬机制
         respond = requests.get(url)
-        #确定编码方式，我也老是搞不清或者忘掉这个所以出现乱码
+        #确定编码方式
         respond.encoding = BeautifulSoup(respond.content, "lxml").original_encoding
-        bs = BeautifulSoup(respond.text, "lxml")
+        #将respond.text改成了respond.content
+        bs = BeautifulSoup(respond.content, "lxml")
         span_list = bs.find_all('span') #找每个新闻的时间
-        #z找到每个新闻的内容，标签？
+        #z找到每个新闻的内容，标签
         part = bs.find_all('p')
         article = ''
         date = ''
         for span in span_list:
-            #这个地方好像['timer']要改成['time']
-            #这里只拿到第一个正确的时间
+            #这个爬的是每个新闻的网站而不是https://company.cnstock.com/company/scp_gsxw
             if 'class' in span.attrs and span['class'] == ['timer']:
                 date = span.text
                 break
@@ -100,13 +101,14 @@ class WebCrawlFromcnstock(object):
             #把<p>和</p>去掉
             string = article[article.find('<'):article.find('>')+1]
             article = article.replace(string,'')
-        #\u3000是去掉中文空格，但实际上还有半角空格，应该再除'\u0020'
+        #\u3000是去掉中文空格
         while article.find('\u3000') != -1:
             article = article.replace('\u3000','')
 
-        #re.split 切割字符串
+        #re.split 切割字符串，有一些段落中会有 +|\n+？
         article = ' '.join(re.split(' +|\n+', article)).strip() 
 
+        #返回最新的时间和所以的内容中文字符
         return date, article
 
     def GenPagesLst(self,totalPages,Range,initPageID):
@@ -124,11 +126,12 @@ class WebCrawlFromcnstock(object):
     def CrawlHistoryCompanyNews(self,startPage,endPage,url_Part_1):
         '''Crawl historical company news 
         '''
-        self.ConnDB()
+        self.ConnDB() #连接到数据库
         AddressLst = self.extractData(['Address'])[0]
         if AddressLst == []:
             urls = []
             for pageId in range(startPage,endPage+1):
+                #现在中国证券网的翻页机制已经变成javascrip了
                 urls.append(url_Part_1 + str(pageId))
             for url in urls:
                 print(url)
@@ -137,6 +140,7 @@ class WebCrawlFromcnstock(object):
                 bs = BeautifulSoup(resp.text, "lxml")
                 a_list = bs.find_all('a')
                 for a in a_list:
+                    
                     if 'href' in a.attrs and 'target' in a.attrs and 'title' in a.attrs \
                     and a['href'].find('http://company.cnstock.com/company/') != -1 \
                     and a.parent.find('span'):
