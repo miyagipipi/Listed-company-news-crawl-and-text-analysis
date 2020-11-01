@@ -13,6 +13,7 @@ import Text_Analysis.text_mining as tm
 
 import gevent
 from gevent import monkey,pool
+#全部变成gevent框架
 monkey.patch_all()
 
 
@@ -111,7 +112,7 @@ class WebCrawlFromcnstock(object):
         #返回最新的时间和所以的内容中文字符
         return date, article
 
-    def GenPagesLst(self,totalPages,Range,initPageID):
+    def GenPagesLst(self,totalPages,Range,initPageID): #621,10,1
         '''Generate page number list using Range parameter.
         '''
         PageLst = []
@@ -119,6 +120,7 @@ class WebCrawlFromcnstock(object):
         while k+Range-1 <= totalPages:
             PageLst.append((k,k+Range-1))
             k += Range
+        #这里是不是应该改成>？
         if k+Range-1 < totalPages:
             PageLst.append((k,totalPages))
         return PageLst
@@ -187,6 +189,8 @@ class WebCrawlFromcnstock(object):
            every once in a while and extract the useful information, 
            including summary, key words, released date, related stock 
            codes list and main body.
+           每隔一段时间从第一个网站页面继续抓取公司新闻，并提取有用信息，
+           包括摘要、关键词、发布日期、相关股票代码列表和正文。
         '''
         doc_lst = []
         self.ConnDB()
@@ -204,6 +208,7 @@ class WebCrawlFromcnstock(object):
                     and a.parent.find('span')) or ('href' in a.attrs and 'target' in a.attrs \
                     and 'title' in a.attrs and a['href'].find('http://ggjd.cnstock.com/company/') != -1 \
                     and a.parent.find('span')):
+                        #表示这个网址的内容未被爬取过
                         if a['href'] not in self._AddressLst:
                             self.realtimeNewsURL.append(a['href'])
                             date, article = self.getUrlInfo(a['href'])
@@ -259,6 +264,7 @@ class WebCrawlFromcnstock(object):
         page_ranges_lst = self.GenPagesLst(totalPages,Range,initPageID)
         for page_range in page_ranges_lst:
             jobs.append(gevent.spawn(self.CrawlHistoryCompanyNews,page_range[0],page_range[1],kwarg['url_Part_1']))
+        #多线程
         gevent.joinall(jobs) 
 
     def multi_threads_run(self,**kwarg):

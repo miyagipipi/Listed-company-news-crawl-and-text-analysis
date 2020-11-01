@@ -1,0 +1,40 @@
+crawler_cnstock.py的注释
+
+WebCrawlFromcnstock类
+	几个属性需要输入：
+	1.ThreadsNum	线程数
+	2.IP	连接数据库的IP
+	3.PORT	连接数据库的port
+	4.dbName	数据库名称
+	5.colName	collection name
+
+	内置的方法：
+	1.ConnDB(): 连接数据库对应IP,PORT, dbName, colName的数据
+				并放入 self._collection 中
+
+	2.countchn(str):字符串分析方法
+					返回一个tuple，包含两个数据，(chnnum, possible)
+					一个是去除了str的所有非中文字符的字符串
+					另一个是 中文字符总数 与 str字符总数 的比值
+
+	3.getUrlInfo(url):返回url里的时间和正文
+
+	4.GenPagesLst(totalPages,Range,initPageID):
+				返回一个list，里面包含从initPageID 到 totalPages并按Rand 划分的数字
+				如(100,10,1)为例，最终得到
+				[(1,10), (11,20), (21,30), ..., (91,100)]
+
+	5.extractData(tag_list):
+				返回一个list，其中包含打开的数据库中的列名称对应tag_list中的的数据的信息
+				tag_list是一个list，其中包含字符串
+
+	6.CrawlHistoryCompanyNews(startPage,endPage,url_Part_1)：
+				做两件事：
+				1.对 url_Part_1 的startPage-endPage页的具体内容进行爬取
+
+				2.将http://company.cnstock.com/company/scp_gsxw/各个新闻的时间，具体地址，标题和具体正文
+				  以data = {'Date' : date,
+                            'Address' : a['href'],
+                            'Title' : a['title'],
+                            'Article' : article}
+                  的形式存储到数据库中
