@@ -18,7 +18,8 @@ monkey.patch_all()
 
 
 class WebCrawlFromjrj(object):
-    '''Crawl company news from 'http://roll.finance.sina.com.cn/finance/zq1/ssgs/index.shtml' website.
+    '''Crawl company news from 
+       'http://roll.finance.sina.com.cn/finance/zq1/ssgs/index.shtml' website.
 
     # Arguments:
         totalPages: Number of pages set to be crawled.
@@ -48,6 +49,7 @@ class WebCrawlFromjrj(object):
         '''Get date list from 'begin_date' to 'end_date' on the calendar.
         '''
         date_list = []  
+        #2020年11月02日 17:40
         begin_date = datetime.datetime.strptime(begin_date, "%Y-%m-%d")  
         end_date = datetime.datetime.strptime(end_date,"%Y-%m-%d")  
         while begin_date <= end_date:  

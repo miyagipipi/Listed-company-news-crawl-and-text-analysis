@@ -7,6 +7,12 @@ WebCrawlFromcnstock类
 	3.PORT	连接数据库的port
 	4.dbName	数据库名称
 	5.colName	collection name
+ 
+	使用：	作为外部使用者，我们只需要使用coroutine_run方法即可
+		 	但是要确保有Mongo数据库且ID 和 PORT要输入正确
+	发现的问题：
+			现在总网页上没有手动点页数的功能，而是改成了一个javascript来点击翻页
+			所以CrawlHistoryCompanyNews方法中的翻页算法不行了
 
 	内置的方法：
 	1.ConnDB(): 连接数据库对应IP,PORT, dbName, colName的数据
@@ -20,7 +26,7 @@ WebCrawlFromcnstock类
 	3.getUrlInfo(url):返回url里的时间和正文
 
 	4.GenPagesLst(totalPages,Range,initPageID):
-				返回一个list，里面包含从initPageID 到 totalPages并按Rand 划分的数字
+				返回一个list，里面包含从initPageID 到 totalPages并按Range 划分的数字
 				如(100,10,1)为例，最终得到
 				[(1,10), (11,20), (21,30), ..., (91,100)]
 
@@ -38,3 +44,11 @@ WebCrawlFromcnstock类
                             'Title' : a['title'],
                             'Article' : article}
                   的形式存储到数据库中
+
+--->7.coroutine_run(totalPages,Range,initPageID,**kwarg):
+				要爬总网页的多少页（totalPages）且每次爬多少页（Range），从第几页开始爬(initPageID)
+				先调用GenPagesLst函数，得到一个包含页数划分的list
+				遍历这个list，将每个元素中的第一个元素和第二个元素作为
+				startPage 和 endPage 参数传入CrawlHistoryCompanyNews函数中
+				而传入coroutine_run的关键字 url_Part_1 也会作为参数传入CrawlHistoryCompanyNews中
+				最终利用gevent架构的多线程来爬去多页数据
