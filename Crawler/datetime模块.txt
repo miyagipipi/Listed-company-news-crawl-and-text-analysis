@@ -1,0 +1,148 @@
+datetime模块中的datetime类
+
+datetime模块中有几个重要的类，比如date, time, datetime, timedelta, tzinfo, datetime_CAPI
+这里主要介绍date, time, datetime类的几个主要方法
+
+datetime类其实是可以看做是date类和time类的合体，其大部分的方法和属性都继承于这二个类
+	date类：
+	1. date（year，month，day)	直接输入年月日创建
+	2. date.today()		
+	如果a是一个date类的对象，我们可以使用a.year or a.month or a.day
+	或者a.__getattribute__('year')
+
+	3.比较：		
+		__eq__(…)	等于(x==y)	x.__eq__(y)
+
+		__ge__(…)	大于等于(x>=y)	x.__ge__(y)
+
+		__gt__(…)	大于(x>y)	x.__gt__(y)
+
+		__le__(…)	小于等于(x<=y)	x.__le__(y)
+
+		__lt__(…)	小于(x	x.__lt__(y)
+
+		__ne__(…)	不等于(x!=y)	x.__ne__(y)
+
+	4.__sub__(...)和__rsub__(...)方法
+
+		__sub__(…)	x - y	x.__sub__(y)
+		__rsub__(…)	y - x	x.__rsub__(y)
+		计算结果的返回值类型为 datetime.timedelta
+		a.__sub__(b).days 获得整数类型的结果
+
+	5.ISO标准化日期
+		isocalendar( ):返回一个包含三个值的元组，三个值依次为：year年份，week number周数，weekday星期数
+		a = datetime.date(2017,3,22)
+		a.isocalendar()
+		a.isocalendar()[0]
+
+		isoformat(...)：返回符合ISO 8601标准的日期字符串
+		a.isoformat()
+		'2017-03-22'
+
+		isoweekday(...): 返回符合ISO标准的指定日期所在的星期数
+		与之相似的还有一个weekday(...)方法，只不过是weekday(...)方法返回的周一为 0, 周日为 6
+
+	6.其他补充：
+	 	timetuple(...):
+	 		该方法为了兼容time.localtime(...)返回一个类型为time.struct_time的数组，但有关时间的部分元素值为0
+
+	 	toordinal(...)： 
+	 		返回公元公历开始到现在的天数。公元1年1月1日为1
+
+	 	replace(...)：
+	 		返回一个替换指定日期字段的新date对象。参数3个可选参数，分别为year,month,day。
+	 		注意替换是产生新对象，不影响原date对象
+	 		还不如再创建一个date对象
+
+	 	fromordinal(...)：
+	 		将Gregorian日历时间转换为date对象；Gregorian是一种日历表示方法，类似于我国的农历，西方国家使用比较多
+
+	 	fromtimestamp(...)：
+	 		根据给定的时间戮，返回一个date对象
+	 		>>> time.time()
+			1490165087.2242179
+			>>> datetime.date.fromtimestamp(time.time())
+			datetime.date(2017, 3, 22)
+
+	7.today(...)：返回当前日期
+	8.max： date类能表示的最大的年、月、日的数值
+		datetime.date(9999, 12, 31)
+	9.min： date类能表示的最小的年、月、日的数值
+		datetime.date(1, 1, 1)
+
+--->10.将date转换为字符串:
+		1.__format__(...)方法以指定格式进行日期输出:
+			a.__format__('%Y-%m-%d')	'2017-03-22'
+			a.__format__('%Y/%m/%d')	'2017/03/22'
+			a.__format__('%D')			'03/22/17'
+
+		2.strftime(...) 等价于__format__():
+			>>> a.strftime("%Y%m%d")
+			'20170322'
+
+		3.__str__(...):
+			简单的获得日期的字符串
+			>>> a.__str__()
+			'2017-03-22'
+
+		4.ctime(...):
+			>>> a.ctime()
+			'Wed Mar 22 00:00:00 2017'
+
+	time类：
+	1.time类由hour小时、minute分钟、second秒、microsecond毫秒和tzinfo五部分组成
+		 time([hour[, minute[, second[, microsecond[, tzinfo]]]]])
+
+	2.__getattribute__(...)方法：同上
+
+	3.比较：同上
+
+	4.__nonzero__(...)：判断时间对象是否非零
+
+	5.其他属性：
+		>>> datetime.time.max
+		datetime.time(23, 59, 59, 999999)
+
+		>>> datetime.time.min
+		datetime.time(0, 0)
+
+		>>> datetime.time.resolution	时间间隔单位为分钟
+		datetime.timedelta(0, 0, 1)	
+
+	6.字符串：
+		a.__format__('%H:%M:%S')
+
+		a.strftime('%H:%M:%S')
+
+		a.isoformat()	ISO标准
+
+		a.__str__()
+
+	datetime类：
+	1. datetime(year, month, day[, hour[, minute[, second[, microsecond[,tzinfo]]]]])
+
+	2.date(…)：返回datetime对象的日期部分
+
+	3.time(…)：返回datetime对象的时间部分
+
+	4.utctimetuple(…)：返回UTC时间元组
+		>>> a = datetime.datetime.now()
+		>>> a
+		datetime.datetime(2017, 3, 22, 16, 9, 33, 494248)
+		>>> a.utctimetuple()
+		time.struct_time(tm_year=2017, tm_mon=3, tm_mday=22, tm_hour=16, tm_min=9, tm_sec=33, tm_wday=2, tm_yday=81, tm_isdst=0)
+
+	5.combine(…)：将一个date对象和一个time对象合并生成一个datetime对象
+
+	6.now(…)：返回当前日期时间的datetime对象
+
+	7.utcnow(…):返回当前日期时间的UTC datetime对象
+
+--->8.strptime(…)：根据string, format 2个参数，返回一个对应的datetime对象
+		>>> datetime.datetime.strptime('2017-3-22 15:25','%Y-%m-%d %H:%M')
+		datetime.datetime(2017, 3, 22, 15, 25)
+
+	9.utcfromtimestamp(…):UTC时间戳的datetime对象，时间戳值为time.time()
+		>>> datetime.datetime.utcfromtimestamp(time.time())
+		datetime.datetime(2017, 3, 22, 8, 29, 7, 654272)
