@@ -47,6 +47,7 @@ class WebCrawlFromjrj(object):
 
     def getEveryDay(self,begin_date,end_date):
         '''Get date list from 'begin_date' to 'end_date' on the calendar.
+           返回一个list，里面包含从begin_date 到 end_date的字符串
         '''
         date_list = []  
         #2020年11月02日 17:40
@@ -55,6 +56,7 @@ class WebCrawlFromjrj(object):
         while begin_date <= end_date:  
             date_str = begin_date.strftime("%Y-%m-%d")  
             date_list.append(date_str)  
+            #加一天 注意参数是days
             begin_date += datetime.timedelta(days=1)  
         return date_list  
 
@@ -117,6 +119,7 @@ class WebCrawlFromjrj(object):
 
     def GenDatesLst(self):
         '''Divide date list into parts using Range parameter.
+           将日期按range属性分块
         '''
         DatesLst = self.getEveryDay(self.startDate,self.endDate)
         NewDatesLst = []
