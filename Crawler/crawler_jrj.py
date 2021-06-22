@@ -84,6 +84,7 @@ class WebCrawlFromjrj(object):
         article = ''
         date = ''
         NotFoundPage = False
+        #寻找具体文章的日期，这里是不是可以优化一下
         for span in span_list:
             for child in span.children:
                 if child == 'jrj_final_date_start':
